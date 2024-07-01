@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/fernandomocrosky/mytemplates/pkg/config"
+	"github.com/fernandomocrosky/mytemplates/pkg/models"
 	"github.com/fernandomocrosky/mytemplates/pkg/render"
 )
 
@@ -13,7 +14,7 @@ type Repository struct {
 	App *config.AppConfig
 }
 
-func NewRepo(a *config.AppConfig) (*Repository) {
+func NewRepo(a *config.AppConfig) *Repository {
 	return &Repository{
 		App: a,
 	}
@@ -24,10 +25,14 @@ func NewHandlers(r *Repository) {
 }
 
 func (m *Repository) Home(w http.ResponseWriter, r *http.Request) {
-	render.RenderTemplate(w, "home.page.tmpl")
+	var stringMap = make(map[string]string)
+	stringMap["test"] = "hello again"
+
+	render.RenderTemplate(w, "home.page.tmpl", &models.TemplateData{
+		StringMap: stringMap,
+	})
 }
 
 func (m *Repository) About(w http.ResponseWriter, r *http.Request) {
-	render.RenderTemplate(w, "about.page.tmpl")
+	render.RenderTemplate(w, "about.page.tmpl", &models.TemplateData{})
 }
-

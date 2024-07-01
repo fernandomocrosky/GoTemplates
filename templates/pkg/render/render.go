@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 
 	"github.com/fernandomocrosky/mytemplates/pkg/config"
+	"github.com/fernandomocrosky/mytemplates/pkg/models"
 )
 
 var app *config.AppConfig
@@ -16,7 +17,11 @@ func NewTemplates(a *config.AppConfig) {
 	app = a
 }
 
-func RenderTemplate(w http.ResponseWriter, tmpl string) {
+func AddDefaultData(td *models.TemplateData) *models.TemplateData {
+	return td
+}
+
+func RenderTemplate(w http.ResponseWriter, tmpl string, td *models.TemplateData) {
 	var tc map[string]*template.Template
 
 	if app.UseCache {
@@ -33,7 +38,9 @@ func RenderTemplate(w http.ResponseWriter, tmpl string) {
 
 	buf := new(bytes.Buffer)
 
-	err := t.Execute(buf, nil)
+	td = AddDefaultData(td)
+
+	err := t.Execute(buf, td)
 	if err != nil {
 		log.Println(err)
 	}
@@ -41,8 +48,8 @@ func RenderTemplate(w http.ResponseWriter, tmpl string) {
 	// Render the template
 	_, err = buf.WriteTo(w)
 	if err != nil {
-        log.Println(err)
-    }
+		log.Println(err)
+	}
 }
 
 func CreateTemplateCache() (map[string]*template.Template, error) {
@@ -64,14 +71,14 @@ func CreateTemplateCache() (map[string]*template.Template, error) {
 
 		matches, err := filepath.Glob("./templates/*.layout.tmpl")
 		if err != nil {
-            return myCache, err
-        }
+			return myCache, err
+		}
 
 		if len(matches) > 0 {
 			ts, err = ts.ParseGlob("./templates/*.layout.tmpl")
 			if err != nil {
-                return myCache, err
-            }
+				return myCache, err
+			}
 		}
 
 		myCache[name] = ts
